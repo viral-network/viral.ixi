@@ -1,0 +1,28 @@
+{
+  "name": "@viral-network/viral.ixi",
+  "version": "0.0.0",
+  "description": "",
+  "main": "viral.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viral-network/viral.ixi.git"
+  },
+  "author": "Chris Dukakis <chrisdukakis@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/viral-network/viral.ixi/issues"
+  },
+  "homepage": "https://github.com/viral-network/viral.ixi#readme",
+  "dependencies": {
+    "@web-ict/bundle": "^0.0.0-beta.28",
+    "@web-ict/converter": "^0.0.0-beta.10",
+    "@web-ict/iss": "^0.0.0-beta.28",
+    "@web-ict/persistence": "^0.0.0-beta.28",
+    "@web-ict/transaction": "^0.0.0-beta.11",
+    "datastore-level": "^5.0.1",
+    "ipfs-core": "^0.7.0",
+    "ipfs-repo": "^9.1.6"
+  }
+}
