@@ -92,6 +92,7 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
                 root: ipfsStore,
                 blocks: ipfsStore,
                 keys: ipfsStore,
+                pins: ipfsStore,
                 datastore: ipfsStore
             }
         })
