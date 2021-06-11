@@ -80,23 +80,32 @@ const MASK_INDEX_LENGTH = 81
 export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagnitude, numberOfTrees }) {
     const persistence = createPersistence(store)
     const iss = ISS(Curl729_27)
+
     const ipfsStore = function(path, options) {
         return new DataStore(path, {
             ...options,
             db: store,
         })
     }
-    const ipfs = IPFS.create({
-        repo: new Repo('/tmp/custom-repo/.ipfs', {
-            storageBackends: {
-                root: ipfsStore,
-                blocks: ipfsStore,
-                keys: ipfsStore,
-                pins: ipfsStore,
-                datastore: ipfsStore
-            }
-        })
-    })
+
+    const ipfs = (function createIpfs() {
+        return IPFS.create({
+            repo: new Repo('/tmp/custom-repo/.ipfs', {
+                storageBackends: {
+                    root: ipfsStore,
+                    blocks: ipfsStore,
+                    keys: ipfsStore,
+                    pins: ipfsStore,
+                    datastore: ipfsStore
+                }
+            })
+        }).catch(() => new Promise(resolve => {
+            setTimeout(() => {
+                resolve(createIpfs())
+            }, 1000)
+        }))
+    })()
+
     const contacts = new Map()
 
     function userAgent({ seed, depth, security }) {
@@ -363,6 +372,13 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
     const posts = new Map()
     const tags = new Map()
     const postsByReference = new Map()
+
+    function unsubscribe() {
+        if (isSubscribed) {
+            isSubscribed = false
+            ixi.removeListener(listener)
+        }
+    }
 
     return {
         userAgent,
@@ -727,11 +743,11 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
             ixi.addListener(listener)
         },
 
-        unsubscribe() {
-            if (isSubscribed) {
-                isSubscribed = false
-                ixi.removeListener(listener)
-            }
-        } 
+        unsubscribe,
+
+        async terminate() {
+            (await ipfs).stop()
+            unsubscribe()
+        }
     }
 }
