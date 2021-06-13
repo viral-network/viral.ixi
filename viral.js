@@ -43,7 +43,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 import { integerValue, integerValueToTrits, trytes, trytesToTrits, TRYTE_WIDTH, RADIX, TRUE, UNKNOWN } from '@web-ict/converter'
-import { ISS, SECURITY_LEVEL_TRITS, BUNDLE_FRAGMENT_TRYTE_LENGTH, KEY_SIGNATURE_FRAGMENT_LENGTH } from '@web-ict/iss'
+import { SECURITY_LEVEL_TRITS, BUNDLE_FRAGMENT_TRYTE_LENGTH, KEY_SIGNATURE_FRAGMENT_LENGTH } from '@web-ict/iss'
 import { ADDRESS_OFFSET, ADDRESS_END, ADDRESS_LENGTH, MESSAGE_OR_SIGNATURE_LENGTH, MESSAGE_OR_SIGNATURE_OFFSET, EXTRA_DATA_DIGEST_LENGTH } from '@web-ict/transaction'
 import { essence, transactionTrits, updateBundleNonce } from '@web-ict/bundle/src/bundle.js'
 import { createPersistence } from '@web-ict/persistence'
@@ -77,7 +77,7 @@ export const POST_TYPES = {
 const VOTE_TYPE_LENGTH = 1
 const MASK_INDEX_LENGTH = 81
 
-export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagnitude, numberOfTrees }) {
+export function viral({ Curl729_27, ISS, ixi, store, merkleTreeWorker, maxWeightMagnitude, numberOfTrees }) {
     const persistence = createPersistence(store)
     const iss = ISS(Curl729_27)
 
@@ -108,10 +108,10 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
 
     const contacts = new Map()
 
-    function userAgent({ seed, depth, security }) {
+    async function userAgent({ seed, depth, security }) {
         const seedTrits = trytesToTrits(seed, new Int8Array(HASH_LENGTH))
         const id = trytes(
-            iss.addressFromDigests(iss.digests(iss.key(iss.subseed(seedTrits, 0), 1))),
+            await iss.addressFromDigests(await iss.digests(await iss.key(await iss.subseed(seedTrits, 0), 1))),
             0,
             ADDRESS_LENGTH
         )
@@ -151,7 +151,7 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
                 }
             })
 
-        function authenticate({ publicFlag, payload, root, index, depth }) {
+        async function authenticate({ publicFlag, payload, root, index, depth }) {
             const transactions = []
             const issuanceTimestamp = Math.floor(Date.now() / 1000)
             const tag = trytesToTrits('VIRAL')
@@ -201,13 +201,13 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
                 }))
             }
 
-            const key = iss.key(iss.subseed(seedTrits, leafIndex), security)
+            const key = await iss.key(await iss.subseed(seedTrits, leafIndex), security)
             const bundle = updateBundleNonce(Curl729_27)(transactions, security)
             const bundleTrytes = iss.bundleTrytes(bundle, security)
 
             for (let i = 0; i < security; i++) {
                 transactions[transactions.length - security + i].set(
-                    iss.signatureFragment(
+                    await iss.signatureFragment(
                         bundleTrytes.slice(i * BUNDLE_FRAGMENT_TRYTE_LENGTH, (i + 1) * BUNDLE_FRAGMENT_TRYTE_LENGTH),
                         key.slice(i * KEY_SIGNATURE_FRAGMENT_LENGTH, (i + 1) * KEY_SIGNATURE_FRAGMENT_LENGTH)
                     ),
@@ -246,7 +246,7 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
                 payload.set(textTrits, POST_TYPE_LENGTH + ADDRESS_LENGTH + 81)
                 payload.set(filePathsTrits, POST_TYPE_LENGTH + ADDRESS_LENGTH + 81 + textTrits.length)
 
-                ixi.attachToTangle(authenticate({ publicFlag: 1, payload, root, index, depth }), 1)
+                ixi.attachToTangle(await authenticate({ publicFlag: 1, payload, root, index, depth }), 1)
             },
 
             async reply(reference, text, images=[]) {
@@ -277,7 +277,7 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
                 payload.set(textTrits, POST_TYPE_LENGTH + EXTRA_DATA_DIGEST_LENGTH + ADDRESS_LENGTH + 81)
                 payload.set(filePathsTrits, POST_TYPE_LENGTH + EXTRA_DATA_DIGEST_LENGTH + ADDRESS_LENGTH + 81 + textTrits.length)
 
-                ixi.attachToTangle(authenticate({ publicFlag: 1, payload, root, index, depth }), 1)
+                ixi.attachToTangle(await authenticate({ publicFlag: 1, payload, root, index, depth }), 1)
             },
 
             async vote(reference, type) {
@@ -289,7 +289,7 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
                 payload.set(nextRoot, POST_TYPE_LENGTH + EXTRA_DATA_DIGEST_LENGTH)
                 payload[POST_TYPE_LENGTH + EXTRA_DATA_DIGEST_LENGTH + ADDRESS_LENGTH] = type
 
-                ixi.attachToTangle(authenticate({ publicFlag: 1, payload, root, index, depth }), 1)
+                ixi.attachToTangle(await authenticate({ publicFlag: 1, payload, root, index, depth }), 1)
             },
 
             async message(contactIndex, text) {
@@ -303,9 +303,9 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
                 payloadToMask.set(textTrits, ADDRESS_LENGTH)
 
                 integerValueToTrits(maskIndex, payload, 0)
-                payload.set(mask(Curl729_27, payloadToMask, iss.subseed(contact.localKey, maskIndex)), MASK_INDEX_LENGTH)
+                payload.set(mask(Curl729_27, payloadToMask, await iss.subseed(contact.localKey, maskIndex)), MASK_INDEX_LENGTH)
 
-                ixi.attachToTangle(authenticate({ publicFlag: -1, payload, root, index, depth }), 1)
+                ixi.attachToTangle(await authenticate({ publicFlag: -1, payload, root, index, depth }), 1)
             },
 
             contact(localKey) {
@@ -474,7 +474,7 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
 
                             for (let i = 0; i < security; i++) {
                                 digests.set(
-                                    iss.digest(
+                                    await iss.digest(
                                         bundleTrytes.slice(
                                             i * BUNDLE_FRAGMENT_TRYTE_LENGTH,
                                             (i + 1) * BUNDLE_FRAGMENT_TRYTE_LENGTH
@@ -485,14 +485,14 @@ export function viral({ Curl729_27, ixi, store, merkleTreeWorker, maxWeightMagni
                                 )
                             }
 
-                            if (trytes(iss.getMerkleRoot(iss.addressFromDigests(digests), siblings, index, depth), 0, HASH_LENGTH) === transaction.address) {
+                            if (trytes(await iss.getMerkleRoot(await iss.addressFromDigests(digests), siblings, index, depth), 0, HASH_LENGTH) === transaction.address) {
                                 analyzedExtraDataDigests.add(transaction.extraDataDigest)
 
                                 if (messageOrSignature[PUBLIC_FLAG_OFFSET] === -1) {
                                     const contact = contacts.get(transaction.address)
 
                                     if (contact) {
-                                        const unmaskedPayload = unmask(Curl729_27, payload.slice(MASK_INDEX_LENGTH), iss.subseed(contact.remoteKey, integerValue(payload, 0, MASK_INDEX_LENGTH)))
+                                        const unmaskedPayload = unmask(Curl729_27, payload.slice(MASK_INDEX_LENGTH), await iss.subseed(contact.remoteKey, integerValue(payload, 0, MASK_INDEX_LENGTH)))
                                         const nextRoot = trytes(unmaskedPayload.slice(0, ADDRESS_LENGTH), 0, ADDRESS_LENGTH)
 
                                         contactsPersistence.get(nextRoot).catch((error) => {
