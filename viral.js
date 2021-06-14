@@ -45,7 +45,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import { integerValue, integerValueToTrits, trytes, trytesToTrits, TRYTE_WIDTH, RADIX, TRUE, UNKNOWN } from '@web-ict/converter'
 import { SECURITY_LEVEL_TRITS, BUNDLE_FRAGMENT_TRYTE_LENGTH, KEY_SIGNATURE_FRAGMENT_LENGTH } from '@web-ict/iss'
 import { ADDRESS_OFFSET, ADDRESS_END, ADDRESS_LENGTH, MESSAGE_OR_SIGNATURE_LENGTH, MESSAGE_OR_SIGNATURE_OFFSET, EXTRA_DATA_DIGEST_LENGTH } from '@web-ict/transaction'
-import { essence, transactionTrits, updateBundleNonce } from '@web-ict/bundle/src/bundle.js'
+import { essence, transactionTrits } from '@web-ict/bundle/src/bundle.js'
 import { createPersistence } from '@web-ict/persistence'
 import IPFS from 'ipfs-core'
 import Repo from 'ipfs-repo'
@@ -77,7 +77,7 @@ export const POST_TYPES = {
 const VOTE_TYPE_LENGTH = 1
 const MASK_INDEX_LENGTH = 81
 
-export function viral({ Curl729_27, ISS, ixi, store, merkleTreeWorker, maxWeightMagnitude, numberOfTrees }) {
+export function viral({ Curl729_27, ISS, updateBundleNonce, ixi, store, merkleTreeWorker, maxWeightMagnitude, numberOfTrees }) {
     const persistence = createPersistence(store)
     const iss = ISS(Curl729_27)
 
@@ -202,7 +202,7 @@ export function viral({ Curl729_27, ISS, ixi, store, merkleTreeWorker, maxWeight
             }
 
             const key = await iss.key(await iss.subseed(seedTrits, leafIndex), security)
-            const bundle = updateBundleNonce(Curl729_27)(transactions, security)
+            const bundle = await updateBundleNonce(transactions, security)
             const bundleTrytes = iss.bundleTrytes(bundle, security)
 
             for (let i = 0; i < security; i++) {
