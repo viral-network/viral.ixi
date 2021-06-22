@@ -410,7 +410,9 @@ export function viral({ Curl729_27, ISS, updateBundleNonce, ixi, store, merkleTr
 
                 if (reference.weight > 0) {
                     const analyzedTags = new Set()
-                    ;(reference.text.match(/#\w+/g) || []).map(value => value.slice(1)).forEach(value => {
+                    ;(reference.text.match(
+                        /(#([0-9]|[^\s!@#$%^&*()-=+.\/,\[\{\]\};:'"?><|\\~`\u00A0-\u00BF\u00D7\u00F7\u0250-\u036F\u2000-\u2BFF\u2FF0-\u303F\u4DC0-\u4DFF\uD800-\uF8FF\uFB00-\uFB4F\uFE00-\uFE6F\uFF00-\uFFFF\u{10000}-\u{1D7FF}\u{E0000}-\u{E007F}])+)/gu
+                    ) || []).map(value => value.slice(1)).forEach(value => {
                         if (!analyzedTags.has(value)) {
                             analyzedTags.add(value)
 
@@ -690,7 +692,9 @@ export function viral({ Curl729_27, ISS, updateBundleNonce, ixi, store, merkleTr
 
                                     if (post.text) {
                                         let analyzedTags = new Set()
-                                        ;(post.text.match(/#\w+/g) || []).map(value => value.slice(1)).forEach(value => {
+                                        ;(post.text.match(
+                                            /(#([0-9]|[^\s!@#$%^&*()-=+.\/,\[\{\]\};:'"?><|\\~`\u00A0-\u00BF\u00D7\u00F7\u0250-\u036F\u2000-\u2BFF\u2FF0-\u303F\u4DC0-\u4DFF\uD800-\uF8FF\uFB00-\uFB4F\uFE00-\uFE6F\uFF00-\uFFFF\u{10000}-\u{1D7FF}\u{E0000}-\u{E007F}])+)/gu
+                                        ) || []).map(value => value.slice(1)).forEach(value => {
                                             if (!analyzedTags.has(value)) {
                                                 analyzedTags.add(value)
 
